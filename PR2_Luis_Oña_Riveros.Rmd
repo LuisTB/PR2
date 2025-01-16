@@ -1,0 +1,240 @@
+---
+title: "PR2: Proyecto de Visualización"
+author: "Luis Oña Riveros"
+date: "Enero 2025"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Cargamos librerías necesarias
+if(!require('dplyr')) install.packages('dplyr'); library('dplyr')
+if(!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
+if (!require('tidyverse')) install.packages('tidyverse'); library('tidyverse')
+if (!require('tidygeocoder')) install.packages('tidygeocoder'); library('tidygeocoder')
+```
+
+# 1. Carga de datos
+
+Para empezar, necesitamos cargar el archivo de datos, para después realizar las transformaciones que se piden en el enunciado sobre la variable Region.
+
+```{r}
+# Cargamos el archivo CSV y observamos su estructura
+data <- read.csv("portugal_listinigs.csv")
+
+# Vista general del dataset
+str(data)
+summary(data)
+
+dim(data) # Dimensiones del dataset
+```
+
+# 2. Limpieza de datos
+
+Para la limpieza de datos, primero vamos a ver cuantos valores nulos y en blanco tenemos en nuestro data set.
+
+```{r}
+# Detección de nulos
+print("NULOS:")
+missing_values <- colSums(is.na(data))
+print(missing_values)
+
+# Verificamos valores en blanco
+print("EN BLANCO:")
+blank_values <- colSums(data == "", na.rm = TRUE)
+print(blank_values)
+```
+
+Nuestro conjunto de datos contiene **25 variables y 125.457**. Teniendo esto en cuenta, podemos observar que variables como **GrossArea, NumberOfBedrooms, NumberOfWC, LotSize y BuiltArea como mínimo contienen el 50% de registros a nulo.** Por ello, **eliminamos dichas variables** de nuestro conjunto de datos y asi reducir la dimensionalidad del data set. Lo mismo sucede **respecto a los en blanco con las variables Floor, EnergyEfficiencyLevel, PublishDate, Garage, ElectricCarsCharging y ConservationStatus**.
+
+Cabe recalcar, que también se dan casos donde hay nulos o en blanco, pero con menos afectación de cara a sus respectivas variables. Para las variables con menos nulos o en blanco eliminaremos los registros con estos valores para así evitar cualquier tipo de sesgo. 
+
+Otros casos como el de la variable HasParking con bastantes valores en blanco, nos decantamos por eliminarlo porque en su caso tenemos la variable Parking, que es similar y podemos extraer la misma conclusión con dicha variable.
+
+```{r}
+# Eliminamos registros nulos en columnas críticas
+data <- data %>% filter(!is.na(Price), !is.na(Parking), !is.na(ConstructionYear), !is.na(TotalRooms))
+
+# Eliminamos registros en blanco en columnas críticas
+data <- data %>% filter(!(Town == "" | Type == "" | EnergyCertificate == "" | Elevator == ""))
+
+# Eliminamos variables con demasiados valores nulos (>50%)
+data <- data %>% select(-GrossArea, -NumberOfBedrooms, -NumberOfWC, -LotSize, -BuiltArea, -Floor, -EnergyEfficiencyLevel, -PublishDate, -Garage, -ElectricCarsCharging, -ConservationStatus, -HasParking, -Town)
+
+# Vertificamos los nulos restantes
+missing_values <- colSums(is.na(data))
+print(missing_values)
+```
+
+Podemos observar que **con estos cambios** ahora tenemos un conjunto de datos con **56.570 registros con 13 variables**. Se ha reducido considerablemente la dimensionalidad del conjunto de datos y ahora observamos que solo hay tres variables que siguen teniendo valores nulos pero, en el peor de los casos no representa ni un 2% del total de registros. Entonces, procedemos a eliminar los registro nulos de las tres variables que quedan. A la vez, observaremos como han quedado las variables respecto a los en blanco.
+
+```{r}
+# Eliminamos los nulos restantes
+data <- data %>% filter(!is.na(TotalArea), !is.na(LivingArea), !is.na(NumberOfBathrooms))
+
+# Observamos cuantos valores en blanco quedan despues de eliminar los nulos
+blank_values <- colSums(data == "", na.rm = TRUE)
+print(blank_values)
+```
+No hay datos en blanco en nuestro data set. Podemos observar que con estos cambios ahora tenemos un conjunto de datos con 55.086 registros con 13 variables.
+
+```{r}
+summary(data)
+```
+
+Ahora procedemos a transformar las variables restantes:
+
++ **TotalArea, NumberOfBathrooms y TotalRooms:** Solo aceptamos valores positivos. No pueden darse casos negativos como podemos observar en el summary anterior.
++ **District y City:** Filtramos aquellos distritos que superen o igualen los 500 registros, y realizamos lo mismo con las ciudades pero que superen o igualen los 200 registros.
++ **Price:** Filtramos viviendas por encima o igual a 50.000€ en su precio. Hemos encontrado casos inferiores a 1.000€ que no tienen sentido mantenerlos en el conjunto de datos.
++ **ConstructionYear:** Nos centramos en el intervalo de 1950 al 2024.
++ **EnergyCertificate:** La categoria 'NC' la transformamos en 'No Certificate'.
++ **lat y long:** Obtenemos la latitud y longitud de los distritos para poder visualizarlos en un mapa.
+
+```{r}
+# Eliminamos valores negativos o iguales a 0 en TotalArea y NumberOfBathrooms porque no tiene sentido vender casas o pisos sin baño o Área
+data <- data %>% filter(TotalArea > 0, NumberOfBathrooms > 0, TotalRooms > 0)
+
+# Filtramos distritos con al menos 500 registros
+district_counts <- data %>% 
+  group_by(District) %>% 
+  summarise(Count = n()) %>% 
+  filter(Count >= 500)
+
+data <- data %>% filter(District %in% district_counts$District)
+
+# Filtramos ciudades con al menos 200 registros
+city_counts <- data %>% 
+  group_by(City) %>% 
+  summarise(Count = n()) %>% 
+  filter(Count >= 200)
+
+data <- data %>% filter(City %in% city_counts$City)
+
+# Filtramos los precios superiores o iguales a 50000 y lo redondeamos
+data <- data %>% filter(Price >= 50000)
+data$Price <- round(data$Price)
+
+# Filtramos propiedades construidas a partir del año 1950 (incluido)
+data <- data %>% filter(ConstructionYear >= 1950)
+
+# Cambiamos "NC" a "No Certificate" en la variable EnergyCertificate
+data$EnergyCertificate <- ifelse(data$EnergyCertificate == "NC", "No Certificate", data$EnergyCertificate)
+
+# Obtenemos los distritos que tenemos
+unique_districts <- data %>% 
+  distinct(District) %>% 
+  rename(address = District)
+
+# Para obtener su latitud y longitud
+geocoded_districts <- unique_districts %>% 
+  geocode(address, method = "osm", full_results = FALSE)
+
+# Unimos las coordenadas con el dataset original
+data <- data %>% 
+  left_join(geocoded_districts, by = c("District" = "address"))
+```
+
+Ya hemos realizado las transformaciones necesarias a nuestro conjunto de datos, nos hemos quedado con 31.665 registros y 14 variables. 
+Ahora vamos a visualizar algunas de las variables para hacernos una idea de lo que nos podemos encontrar en el momento de visualizar lso datos.
+
+```{r}
+# Promedio de precios por región
+district_prices <- data %>% 
+  group_by(District) %>% 
+  summarise(AveragePrice = mean(Price, na.rm = TRUE),
+            Count = n()) %>% 
+  arrange(desc(AveragePrice))
+print(district_prices)
+
+# Distribución de precios según el tipo de propiedad
+type_prices <- data %>% 
+  group_by(Type) %>% 
+  summarise(AveragePrice = mean(Price, na.rm = TRUE),
+            Count = n()) %>% 
+  arrange(desc(AveragePrice))
+print(type_prices)
+
+# Visualización de la distribución de precios por tipo de propiedad
+ggplot(type_prices, aes(x = reorder(Type, -AveragePrice), y = AveragePrice)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  theme_minimal() +
+  labs(title = "Distribución de precios por tipo de propiedad",
+       x = "Tipo de propiedad",
+       y = "Precio promedio") +
+  coord_flip()
+```
+
+Depués de ver la distribución de la variable Type, decidimos mantener aquellos registro que o bien sean casas (House) o Pisos/Apartamentos (Apartment).
+
++ **Type:** Nos quedamos sólo con las categorias "House" y "Apartment".
+
+Y visualizaremos los boxplots de las variables "TotalRooms", "TotalArea", "LivingArea" y "NumberOfBathrooms" para ver si tienen outliers y eliminarlos en caso de que tengan.
+
+```{r}
+# Filtrar solo "House" y "Apartment" en Type
+data <- data %>% filter(Type %in% c("House", "Apartment"))
+
+# Visualización de boxplots para cada variable
+variables_to_plot <- c("TotalRooms", "TotalArea", "LivingArea", "NumberOfBathrooms")
+
+for (var in variables_to_plot) {
+  p <- ggplot(data, aes(y = .data[[var]])) +
+    geom_boxplot(fill = "lightblue", outlier.color = "red", outlier.shape = 16) +
+    theme_minimal() +
+    labs(title = paste("Boxplot de", var), y = var)
+  
+  print(p)
+}
+```
+
+Podemos observar que tenemos outliers en las cuatro variables. Vamos a crear una función que detecte los outliers y luego iremos iterando hasta que no quede ninguno.
+
+```{r}
+# Función para calcular outliers
+calculate_outliers <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers <- sum(x < lower_bound | x > upper_bound, na.rm = TRUE)
+  return(list(outliers = outliers, lower_bound = lower_bound, upper_bound = upper_bound))
+}
+
+# Iteramos hasta que no queden outliers en ninguna variable
+variables_to_check <- c("TotalRooms", "TotalArea", "LivingArea", "NumberOfBathrooms")
+outliers_remaining <- TRUE
+
+while (outliers_remaining) {
+  outlier_counts <- sapply(variables_to_check, function(var) {
+    result <- calculate_outliers(data[[var]])
+    data <<- data %>% filter(data[[var]] >= result$lower_bound & data[[var]] <= result$upper_bound)
+    return(result$outliers)
+  })
+  
+  cat("Outliers restantes:\n")
+  print(outlier_counts)
+  
+  # Si no quedan outliers, salimos del bucle
+  outliers_remaining <- any(outlier_counts > 0)
+}
+```
+
+**Ya no tenemos outliers**. Observando que tenemos LivingArea y TotalArea, nos vamos a asegurar de que LivingArea nunca supere a TotalArea, cosa que no tendria sentido.
+
+```{r}
+# Nos quedamos con los registros que TotalArea sea superior o igual a LivingArea
+data <- data %>% filter(LivingArea <= TotalArea)
+summary(data)
+```
+
+Observamos como de un conjunto de datos inicial de 125.457 registros y 25 variables **hemos pasado a otro de 17.586 registros y 14 variables**. Una vez estamos de acuerdo con el resultado y definimos este conjunto como el conjunto de datos final, pasamos a extraer en formato csv el conjunto para trabajar con él más adelante en Tableau Public.
+
+```{r}
+# Exportar dataset limpio con codificación UTF-8
+write.csv(data, "portugal_cleaned_listings.csv", row.names = FALSE, fileEncoding = "UTF-8")
+```
