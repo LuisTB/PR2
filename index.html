@@ -6,7 +6,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0 auto;
+            max-width: 1200px;
+            padding: 20px;
             background-color: #f8f8f8;
         }
         h1 {
@@ -18,7 +20,7 @@
         }
         .tableauPlaceholder {
             margin: 20px 0;
-            width: 80%;
+            width: 100%;
             height: 500px;
             max-width: 1000px;
             margin: 20px auto;
@@ -33,49 +35,106 @@
         a:hover {
             text-decoration: underline;
         }
+        .conclusiones {
+            margin-top: 40px;
+        }
+        .conclusiones ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .conclusiones li {
+            margin-bottom: 15px;
+        }
+        .sub-item {
+            margin-left: 20px;
+            list-style-type: disc;
+        }
     </style>
 </head>
 <body>
-    <h1>PR2: Narración de historias con datos</h1>
+    <nav>
+        <ul style='list-style: none; padding: 0; display: flex; gap: 15px;'>
+            <li><a href="PR2_Luis_Oña_Riveros.html" target="_blank" style="text-decoration: none; color: #2c3e50;">Ver Documento de RStudio</a></li>
+        </ul>
+    </nav>
+    <hr><h1>PR2: Narración de historias con datos</h1>
     <h3>Luis Oña Riveros</h3>
 
     <!-- Visualización de la Historia de Tableau -->
     <h2>Storytelling</h2>
     <p>Presentación del estudio realizado al fichero "portugal_listinigs.csv" mediante Tableau Public:</p>
     <div class="tableauPlaceholder" id="viz1736985700927" style="position: relative">
-	  <noscript>
-		<a href="#">
-		  <img 
-			alt="Historia 1" 
-			src="https://public.tableau.com/static/images/PR/PR2-Visualizacin/Historia1/1_rss.png" 
-			style="border: none" 
-		  />
-		</a>
-	  </noscript>
-	  <object class="tableauViz" style="display: none;">
-		<param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
-		<param name="embed_code_version" value="3" />
-		<param name="site_root" value="" />
-		<param name="name" value="PR2-Visualizacin/Historia1" />
-		<param name="tabs" value="no" />
-		<param name="toolbar" value="yes" />
-		<param name="static_image" value="https://public.tableau.com/static/images/PR/PR2-Visualizacin/Historia1/1.png" />
-		<param name="animate_transition" value="yes" />
-		<param name="display_static_image" value="yes" />
-		<param name="display_spinner" value="yes" />
-		<param name="display_overlay" value="yes" />
-		<param name="display_count" value="yes" />
-		<param name="language" value="es-ES" />
-	  </object>
-	</div>
-	<script type="text/javascript">
-	  var divElement = document.getElementById('viz1736985700927');
-	  var vizElement = divElement.getElementsByTagName('object')[0];
-	  vizElement.style.width = '1100px';
-	  vizElement.style.height = '991px';
-	  var scriptElement = document.createElement('script');
-	  scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-	  vizElement.parentNode.insertBefore(scriptElement, vizElement);
-	</script>
+        <noscript>
+            <a href="#">
+                <img 
+                    alt="Historia 1" 
+                    src="https://public.tableau.com/static/images/PR/PR2-Visualizacin/Historia1/1_rss.png" 
+                    style="border: none" 
+                />
+            </a>
+        </noscript>
+        <object class="tableauViz" style="display: none;">
+            <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+            <param name="embed_code_version" value="3" />
+            <param name="site_root" value="" />
+            <param name="name" value="PR2-Visualizacin/Historia1" />
+            <param name="tabs" value="no" />
+            <param name="toolbar" value="yes" />
+            <param name="static_image" value="https://public.tableau.com/static/images/PR/PR2-Visualizacin/Historia1/1.png" />
+            <param name="animate_transition" value="yes" />
+            <param name="display_static_image" value="yes" />
+            <param name="display_spinner" value="yes" />
+            <param name="display_overlay" value="yes" />
+            <param name="display_count" value="yes" />
+            <param name="language" value="es-ES" />
+        </object>
+    </div>
+    <script type="text/javascript">
+        var divElement = document.getElementById('viz1736985700927');
+        var vizElement = divElement.getElementsByTagName('object')[0];
+        vizElement.style.width = '1100px';
+        vizElement.style.height = '991px';
+        var scriptElement = document.createElement('script');
+        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+    </script>
+
+    <!-- Conclusiones -->
+    <div class="conclusiones">
+        <h2>Conclusiones</h2>
+        <ul>
+            <li><strong>Tendencias espaciales:</strong>
+                <ul class="sub-item">
+                    <br><li><strong>¿Cómo varían los precios según la región?</strong><br>
+                        Podemos observar diferencias entre regiones. Por ejemplo, Lisboa, Faro y Aveiro son las más caras, doblando en el promedio del precio a Castelo Branco y Santarém.<br>
+                        En el caso de ciudades, el gráfico de diferencia entre ciudades y distritos nos ayuda a observar que, en un mismo distrito, pueden darse grandes diferencias de precio dependiendo de qué ciudad sea la propiedad.
+                    </li>
+                    <li><strong>¿Qué diferencias existen en las áreas de las propiedades entre distritos?</strong><br>
+                        Lo primero que podemos observar es que los distritos más solicitados tienen una media de área total menor, frente a aquellos distritos con menos demanda que ofrecen propiedades con mayor área total. Esto también podemos observarlo en España: un piso en Barcelona puede valer mucho por su ubicación, pero ofrecer apenas 60 m², frente a una casa en un pueblo alejado que ofrezca el doble de área y valga menos.
+                    </li>
+                </ul>
+            </li>
+            <br><li><strong>Impacto de características específicas:</strong>
+                <ul class="sub-item">
+                    <br><li><strong>¿Existe diferencia respecto al tipo de vivienda?</strong><br>
+                        Podemos observar que el tipo de vivienda con mayor compraventa son los pisos, superando en número a las casas. Además, el precio promedio de los pisos es superior al de las casas, aunque estas últimas suelen tener un área total mayor.
+                    </li>
+                    <li><strong>¿Cómo influyen las características como habitaciones, garajes, baños o ascensores en los precios?</strong><br>
+                        Como era esperado, contra más ofrezca la vivienda, mayor será el precio. Viviendas con más habitaciones, baños o garajes, o aquellas que disponen de ascensor, tienden a tener precios más altos.
+                    </li>
+                    <li><strong>¿Qué impacto tiene la certificación energética en los precios?</strong><br>
+                        Las viviendas con mejor certificación energética son las más caras en promedio. Sin embargo, las certificaciones energéticas más comunes son C, D y E, lo cual refleja que la mayoría de los registros abarca un intervalo amplio de años (1950-2024). A medida que nos acercamos a la actualidad, observamos un aumento en las viviendas con mejor certificación energética.
+                    </li>
+                </ul>
+            </li>
+            <br><li><strong>Tendencias temporales:</strong>
+                <ul class="sub-item">
+                    <br><li><strong>¿Cómo han evolucionado los precios o el número de listados a lo largo del tiempo?</strong><br>
+                        Los precios de las viviendas han aumentado de forma consistente, tanto para los pisos como para las casas.<br><br>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
 </body>
 </html>
