@@ -56,10 +56,20 @@
     <h3>Luis Oña Riveros</h3>
 
     <!-- Visualización de la Historia de Tableau -->
-    <h2>Storytelling</h2>
-    <p>La presentación del estudio de "portugal_listinigs.csv", se ha realizado mediante Tableau Public.</p> 
-	<p>La limpieza prévia a la visualización de datos se ha realizado en RStudio. Podeis acceder a la implementación en el siguiente enlace <a href="PR2_Luis_Oña_Riveros.html" style= color: #0000FF;"> ( Ver Documento de RStudio )</a>.</p>
-	<p>Respecto al orígen del fichero, lo obtuve de Kaggle <a href="https://www.kaggle.com/datasets/luvathoms/portugal-real-estate-2024">( Clic aquí )</a>.</p>
+    <p>La presentación del estudio de "portugal_listinigs.csv", se ha realizado mediante <strong>Tableau Public</strong>.</p> 
+	<p>Respecto al orígen del fichero, lo obtuve de Kaggle <a href="https://www.kaggle.com/datasets/luvathoms/portugal-real-estate-2024">(<strong> Clic aquí </strong>)</a>.</p>
+	<p>La <strong>limpieza prévia</strong> a la visualización de datos se ha realizado en RStudio. Podeis acceder a la implementación en el siguiente enlace <a href="PR2_Luis_Oña_Riveros.html" style= color: #0000FF"> (<strong> Ver Documento de RStudio </strong>)</a>.</p>
+	<p>Algunas de las transformaciones principales son:</p>
+		<ul>
+			<li>Variables con más del 50% de registros a nulo o en blanco eliminadas.</li>
+			<li>Eliminación de todo tipo de registro con nulo o en blanco respecto a las variables de estudio.</li>
+			<li>Eliminación de outliers.</li>
+			<li>TotalArea, NumberOfBathrooms y TotalRooms: Solo aceptamos valores positivos. No pueden darse casos negativos.</li>
+			<li>ConstructionYear: Nos centramos en el intervalo de 1950 al 2024.</li>
+			<li>Geolocalización: Obtenemos la latitud y longitud de los distritos para poder visualizarlos en un mapa.</li>
+			<li>Type: Nos quedamos sólo con las categorias “House” y “Apartment”.</li>
+		</ul>
+	<p>Gracias a estas transformaciones y otras que se pueden observar en el documento de RStudio, hemos pasado de un conjunto de datos de 125.457 registros y 25 variables a uno de <strong>17.586 registros y 14 variables</strong>.</p>
     <div class="tableauPlaceholder" id="viz1736985700927" style="position: relative">
         <noscript>
             <a href="#">
